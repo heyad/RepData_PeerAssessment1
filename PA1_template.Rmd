@@ -65,8 +65,9 @@ cat("Mean value of steps taken per day is: ", meanVal, "\nMedian value of steps 
 dataSubset <- ddply(originalData,.(interval), summarize, average_steps=mean(steps, na.rm=TRUE))
 
 ## plot a time series of average number of taken steps per interval
-plot(dataSubset$interval, dataSubset$average_steps, 
+plot(1:288, dataSubset$average_steps, 
              type="l",lwd=2, xlab="Five minutes intervals", ylab="Average take steps")
+
 ```
 
 The code below reports which 5-minute interval, on average across all the days in the dataset,
