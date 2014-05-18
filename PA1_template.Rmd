@@ -150,9 +150,10 @@ filledDataSet$weekDays= NULL
 colnames(filledDataSet)[4]<- "weekdays"
 
 ## Check the results and see how the data set looks like
-head(filledDataSet,10)
+head(filledDataSet,5)
 ```
-Now the day set has another two columns, so we can plot activity based on weekdays or weekends time as required. 
+Now the data set has another two columns, so we can plot activity based on weekdays or weekends time as required, there may be a better approach, but mine is outlined as follwos:
+* create to subsets of averged steps taken / interval (one for weekdays and one for weekends)
 
 ```{r, echo=TRUE}
 
@@ -162,7 +163,7 @@ weekEndsSubset <- subset(filledDataSet, filledDataSet$weekdays=="weekend")
 weekDaysSubset <- subset(filledDataSet, filledDataSet$weekdays=="weekday")
 
 ```
-Now, the next step before plotting the time series is to averag the two data sets:
+* Now, the next step before plotting the time series is to averag the two data sets:
 * *weekDaysSubset*
 * *weekEndsSubset*
 
@@ -173,11 +174,14 @@ weekEndsAveraged <- ddply(weekEndsSubset,.(interval), summarize, average_steps=m
 head(weekEndsAveraged)
 weekDayssAveraged <- ddply(weekDaysSubset,.(interval), summarize, average_steps=mean(steps))
 head(weekDayssAveraged)
-
-
+```
+* Combine both averaged Data Sets and plot the results 
+```{r, echo=TRUE}
+## Now we both data sets are added to one averaged data set to be used for the plotting
+totalAveraged <- rbind(weekEndsAveraged, weekDayssAveraged)
 ## load lattice library
 require (lattice)
 
-xyplot(steps ~ interval|weekdays,data=filledDataSet, type="l", layout=c(1,2))
+xyplot(average_steps ~ interval | factor(c("weekday","weekend")),data=totalAveraged, type="l", layout=c(1,2))
 
 ```
