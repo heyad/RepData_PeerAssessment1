@@ -250,24 +250,20 @@ filledDataSet$weekDays = NULL
 colnames(filledDataSet)[4] <- "weekdays"
 
 ## Check the results and see how the data set looks like
-head(filledDataSet, 10)
+head(filledDataSet, 5)
 ```
 
 ```
-##    interval  steps       date weekdays
-## 1         0  1.717 2012-10-01  weekday
-## 2         0  0.000 2012-10-02  weekday
-## 3         0  0.000 2012-10-03  weekday
-## 4         0 47.000 2012-10-04  weekday
-## 5         0  0.000 2012-10-05  weekday
-## 6         0  0.000 2012-10-06  weekend
-## 7         0  0.000 2012-10-07  weekend
-## 8         0  1.717 2012-10-08  weekday
-## 9         0  0.000 2012-10-09  weekday
-## 10        0 34.000 2012-10-10  weekday
+##   interval  steps       date weekdays
+## 1        0  1.717 2012-10-01  weekday
+## 2        0  0.000 2012-10-02  weekday
+## 3        0  0.000 2012-10-03  weekday
+## 4        0 47.000 2012-10-04  weekday
+## 5        0  0.000 2012-10-05  weekday
 ```
 
-Now the day set has another two columns, so we can plot activity based on weekdays or weekends time as required. 
+Now the data set has another two columns, so we can plot activity based on weekdays or weekends time as required, there may be a better approach, but mine is outlined as follwos:
+* create to subsets of averged steps taken / interval (one for weekdays and one for weekends)
 
 
 ```r
@@ -280,7 +276,7 @@ weekEndsSubset <- subset(filledDataSet, filledDataSet$weekdays == "weekend")
 weekDaysSubset <- subset(filledDataSet, filledDataSet$weekdays == "weekday")
 ```
 
-Now, the next step before plotting the time series is to averag the two data sets:
+* Now, the next step before plotting the time series is to averag the two data sets:
 * *weekDaysSubset*
 * *weekEndsSubset*
 
@@ -317,9 +313,12 @@ head(weekDayssAveraged)
 ## 6       25       1.59036
 ```
 
+* Combine both averaged Data Sets and plot the results 
+
 ```r
-
-
+## Now we both data sets are added to one averaged data set to be used for
+## the plotting
+totalAveraged <- rbind(weekEndsAveraged, weekDayssAveraged)
 ## load lattice library
 require(lattice)
 ```
@@ -334,9 +333,9 @@ require(lattice)
 
 ```r
 
-xyplot(steps ~ interval | weekdays, data = filledDataSet, type = "l", layout = c(1, 
-    2))
+xyplot(average_steps ~ interval | factor(c("weekday", "weekend")), data = totalAveraged, 
+    type = "l", layout = c(1, 2))
 ```
 
-![plot of chunk unnamed-chunk-16](figure/unnamed-chunk-16.png) 
+![plot of chunk unnamed-chunk-17](figure/unnamed-chunk-17.png) 
 
