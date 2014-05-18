@@ -1,10 +1,10 @@
-# Reproducible Research: Peer Assessment 1
+# Reproducible Research: Peer Assessment 1 (Final Submission)
 
 This work is part of the 1st Peer Assessment for the Reproducible Research Course. The first step in this work is to obtain the data set  [Activity Monitoring Data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip)
 
 ## Loading and preprocessing the data
 
-For this part of the assignment the code below does the following:
+For this part of the assignment the code below does the followings:
 - Load data in R and define the appropriate classes for each field in the data set
 - Obtain  the column names (colNames), number of rows in the data set (numberofRows)
 - Print numberofRows and colNames
@@ -56,17 +56,6 @@ To get the mean, first we construct a subset of data that contains the number of
 ```r
 ## {plyr} is required before calling the ddply function
 require(plyr)
-```
-
-```
-## Loading required package: plyr
-```
-
-```
-## Warning: package 'plyr' was built under R version 3.0.3
-```
-
-```r
 ## for this part, remove the missing values. If you work in RStudio you may
 ## need to replace summarize with summarise if you recieve an error?
 dataSubset <- ddply(originalData, .(date), summarize, steps = sum(steps, na.rm = TRUE))
@@ -157,20 +146,15 @@ proccessedDataSet <- ddply(originalData, .(interval), summarize, average_steps =
 ```
 
 This will give us a data frame with all time intervals and the average number of steps taken at each interval. This date will be used to fill missing values. Executing the command:  
-**head**  *(proccessedDataSet,10)*, will show how this dataframe  looks like
+**head**  *(proccessedDataSet,5)*, will show how this dataframe  looks like
 
 ```
-##    interval average_steps
-## 1         0       1.71698
-## 2         5       0.33962
-## 3        10       0.13208
-## 4        15       0.15094
-## 5        20       0.07547
-## 6        25       2.09434
-## 7        30       0.52830
-## 8        35       0.86792
-## 9        40       0.00000
-## 10       45       1.47170
+##   interval average_steps
+## 1        0       1.71698
+## 2        5       0.33962
+## 3       10       0.13208
+## 4       15       0.15094
+## 5       20       0.07547
 ```
 
 
@@ -181,17 +165,6 @@ Next step, is to find all missing values in the original dataset and replace the
 
 ```r
 require(DataCombine)
-```
-
-```
-## Loading required package: DataCombine
-```
-
-```
-## Warning: package 'DataCombine' was built under R version 3.0.3
-```
-
-```r
 filledDataSet <- FillIn(originalData, proccessedDataSet, "steps", "average_steps", 
     "interval")
 ```
@@ -321,17 +294,6 @@ head(weekDayssAveraged)
 totalAveraged <- rbind(weekEndsAveraged, weekDayssAveraged)
 ## load lattice library
 require(lattice)
-```
-
-```
-## Loading required package: lattice
-```
-
-```
-## Warning: package 'lattice' was built under R version 3.0.3
-```
-
-```r
 
 xyplot(average_steps ~ interval | factor(c("weekday", "weekend")), data = totalAveraged, 
     type = "l", layout = c(1, 2))
