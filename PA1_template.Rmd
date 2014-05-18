@@ -1,16 +1,16 @@
 # Reproducible Research: Peer Assessment 1
 
-This work is part of the 1st Peer Assessment for the Reproducible Research Course. The first step in this work is to obtain the data set whic his available here [link](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip)
+This work is part of the 1st Peer Assessment for the Reproducible Research Course. The first step in this work is to obtain the data set  [Activity Monitoring Data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip)
 
 ## Loading and preprocessing the data
 
 For this part of the assignment the code below does the following:
-- Unzip the zipped file
 - Load data in R and define the appropriate classes for each field in the data set
 - Obtain  the column names (colNames), number of rows in the data set (numberofRows)
 - Print numberofRows and colNames
 - Print the time/date the dataset was downloaded from the github
 
+The follwoing ** R ** code just shows the time the the dataset was created/ downloaded 
 ```{r,echo=TRUE}
 
 sourceFile <- "activity.zip"
@@ -18,13 +18,17 @@ sourceFile <- "activity.zip"
 ## show the time the file was downloaded
 dateaccessed <-as.character(file.info(sourceFile)$mtime)
 cat("activity.zip was downloaded on: ", dateaccessed)
+```
 
-## load the file into R and extract the activity.csv from the zip file      
-dataSet <- read.csv(unz(sourceFile, "activity.csv"), header=TRUE, colClasses=c("numeric", "Date", "numeric"), stringsAsFactors=FALSE)
+The first step is to load the data set into R, this code will only work if the activity.zip file is available in your working directory. After data is loaded, then column names and the number of records in the data set are printed, just for quick exploration of the data
+
+```{r,echo=TRUE}
+## extract the activity.csv from the zip file  load the file into R and    
+originalData <- read.csv(unz(sourceFile, "activity.csv"), header=TRUE, colClasses=c("numeric", "Date", "numeric"), stringsAsFactors=FALSE)
 ## get the column names in the data set
-colNames <- colnames(dataSet)
-# number of rows in the dataset
-numberofRows <- nrow(dataSet)
+colNames <- colnames(originalData)
+# number of rows in the originalData
+numberofRows <- nrow(originalData)
 ## print colNames and numberofRows
 cat("Number of Records in the Data Set: ", numberofRows, "\n","Columns Names in the Data Set:", colNames)
 
@@ -33,12 +37,13 @@ cat("Number of Records in the Data Set: ", numberofRows, "\n","Columns Names in 
 
 ## What is mean total number of steps taken per day?
 
-To get the mean, first we construct a subset of data that contains the number of steps per date:
+To get the mean, first we construct a subset of data that contains the number of steps per day. First, lets construct the subset, then create the histogram and followed by computing the mean and the median as shown below:
 ```{r, echo=TRUE}
 ## {plyr} is required before calling the ddply function 
 require(plyr)
-## for this part, remove the missing values 
-dataSubset <- ddply(dataSet,.(date), summarize, steps=sum(steps, na.rm=TRUE))
+## for this part, remove the missing values. If you work in RStudio you may need to 
+## replace summarize with summarise if you recieve an error?
+dataSubset <- ddply(originalData,.(date), summarize, steps=sum(steps, na.rm=TRUE))
 hist(dataSubset$steps, breaks=15, main ="Number of Steps Taken per Day",
              col="seagreen", xlab ="Steps per Day", ylab= "Frequency")
 ```
@@ -47,7 +52,8 @@ To calculate the mean and median, the dataSubset will be used.
 meanVal <- mean(dataSubset$steps)
 medVal <- median(dataSubset$steps)
 ##show the results 
-cat("Mean value of steps taken per day is: ", meanVal, "\nMedian value of steps taken per day is: ", medVal)
+cat("Mean value of steps taken per day is: ", meanVal, "\nMedian value of steps taken per day is: "
+    , medVal)
 ```
 ## What is the average daily activity pattern?
 
@@ -56,24 +62,121 @@ cat("Mean value of steps taken per day is: ", meanVal, "\nMedian value of steps 
 ```{r,echo=TRUE}
 ## create a subset i.e. dataframe of average number of steps grouped by interval
 ## overall there is 288 interval (i.e. nrow(dataSubset) results in 288)
-dataSubset <- ddply(dataSet,.(interval), summarize, steps=mean(steps, na.rm=TRUE))
+dataSubset <- ddply(originalData,.(interval), summarize, average_steps=mean(steps, na.rm=TRUE))
 
-## plot a time series of average number of taken steps per activity
-plot(dataSubset$interval, dataSubset$steps, 
-             type="l", xlab="Five minutes intervals", ylab="Average take steps")
-
+## plot a time series of average number of taken steps per interval
+plot(dataSubset$interval, dataSubset$average_steps, 
+             type="l",lwd=2, xlab="Five minutes intervals", ylab="Average take steps")
 ```
 
 The code below reports which 5-minute interval, on average across all the days in the dataset,
 contains the maximum number of steps:
 
 ```{r,echo=TRUE}
-maxInterval <- dataSubset[which.max(dataSubset[,"steps"]),]
+maxInterval <- dataSubset[which.max(dataSubset[,"average_steps"]),]
 ## print the results
-cat("The Interval ", maxInterval$interval, " On average accross all days, has the maximum number of steps which is equal to", maxInterval$steps)
+cat("The Interval ", maxInterval$interval, " On average accross all days, 
+    has the maximum number of steps which is equal to", maxInterval$average_steps)
 ```
 ## Imputing missing values
 
 
+1 The the total number of rows with missing values *NAs* is obtained as follows 
+```{r,echo=TRUE}
+nRowsMissing <- nrow(originalData[!complete.cases(originalData),])
 
+```
+To report the results to the user, the follwoing code is needed 
+```{r,echo=TRUE}
+cat ("Total Number of Rows with NA's is ", nRowsMissing )
+
+```
+2 The strategy for filling the missing values is simple, each missing value will be replaced with the average steps taken in that day. There is wide range of methods for dealing with missing values, have a look at [stackoverflow](http://stackoverflow.com) for [Some Interesting Posts](http://stackoverflow.com/questions/20273070/function-to-impute-missing-value) on this issue. Another very useful package to deal with missing values is [Amelia Package](http://cran.r-project.org/web/packages/Amelia/vignettes/amelia.pdf)
+```{r, echo=TRUE}
+require(plyr)
+## We need to remove the NA initially to get an approximated averages for the time intervals  
+proccessedDataSet <- ddply(originalData,.(interval), summarize, average_steps=mean(steps, na.rm=TRUE))
+
+```
+This will give us a data frame with all time intervals and the average number of steps taken at each interval. This date will be used to fill missing values. Executing the command:  
+**head**  *(proccessedDataSet,10)*, will show how this dataframe  looks like
+```{r, echo=FALSE}
+head(proccessedDataSet,10)
+```
+
+Next step, is to find all missing values in the original dataset and replace them with the average steps taken in the corresponding interval in the *proccessedDataSet* dataset. The follwoing code make use ['DataCombine'](http://cran.r-project.org/web/packages/DataCombine/DataCombine.pdf) package 
+
+*FillIn*  function is used for filling in missing values of steps in the original data set from the processed data set which contains averaged intervals of steps. Results are stored in filledDataSet
+
+```{r, echo=TRUE}
+require(DataCombine) 
+filledDataSet <- FillIn(originalData, proccessedDataSet,"steps", "average_steps", "interval")
+```
+
+3 The new data set of filled data (**filledDataSet**)is already created, and here is the histogram for the new data set, followed by the mean and median values 
+
+```{r,echo=TRUE}
+
+dataSubset <- ddply(filledDataSet,.(date), summarize, steps=sum(steps))
+hist(dataSubset$steps, breaks=15, main ="Number of Steps Taken per Day (NA replaced)",
+             col="seagreen", xlab ="Steps per Day", ylab= "Frequency")
+
+```
+The mean and median values for the filled data set are calculated here
+```{r,echo=TRUE}
+meanValF <- mean(filledDataSet$steps)
+medValF <- median(filledDataSet$steps)
+##show the results 
+cat("Mean value of steps taken per day is (with NA's replaced): ", meanValF, "\nMedian value of steps taken per day is: "
+    , medValF)
+
+```
+The results above shows clearly that imputing missing data will change the average number of steps taken as well as the median value. The average number of steps taken per day is significantly reduced
 ## Are there differences in activity patterns between weekdays and weekends?
+
+We first need to update the filledDataSet data set to include another column and we will cal it weekDays. This will take values of (sun, mon, ....sat), 
+```{r, echo=TRUE}
+## Add a new column to the filled dataset and set it to equal the day value
+filledDataSet$weekDays <- weekdays(filledDataSet$date)
+## Add a nother column which will indicate wheather this day is weekday or weekend
+filledDataSet[((filledDataSet[,4]=="Saturday")| (filledDataSet[,4]=="Sunday") ), 5] <- "weekend"
+filledDataSet[!((filledDataSet[,4]=="Saturday")| (filledDataSet[,4]=="Sunday") ), 5] <- "weekday"
+
+## drop the fourth column because it is not needed any more
+filledDataSet$weekDays= NULL
+
+##change the column name
+colnames(filledDataSet)[4]<- "weekdays"
+
+## Check the results and see how the data set looks like
+head(filledDataSet,10)
+```
+Now the day set has another two columns, so we can plot activity based on weekdays or weekends time as required. 
+
+```{r, echo=TRUE}
+
+## first subset the data to include only weekends, and show the first few records for testing
+weekEndsSubset <- subset(filledDataSet, filledDataSet$weekdays=="weekend")
+## similarly subset the data to include only weekdays, and show the first few records for testing
+weekDaysSubset <- subset(filledDataSet, filledDataSet$weekdays=="weekday")
+
+```
+Now, the next step before plotting the time series is to averag the two data sets:
+* *weekDaysSubset*
+* *weekEndsSubset*
+
+```{r, echo=TRUE}
+
+## Average subsets accross intervals 
+weekEndsAveraged <- ddply(weekEndsSubset,.(interval), summarize, average_steps=mean(steps))
+head(weekEndsAveraged)
+weekDayssAveraged <- ddply(weekDaysSubset,.(interval), summarize, average_steps=mean(steps))
+head(weekDayssAveraged)
+
+
+## load lattice library
+require (lattice)
+
+xyplot(steps ~ interval|weekdays,data=filledDataSet, type="l", layout=c(1,2))
+
+```
