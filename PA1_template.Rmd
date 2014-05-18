@@ -1,10 +1,10 @@
-# Reproducible Research: Peer Assessment 1
+# Reproducible Research: Peer Assessment 1 (Final Submission)
 
 This work is part of the 1st Peer Assessment for the Reproducible Research Course. The first step in this work is to obtain the data set  [Activity Monitoring Data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip)
 
 ## Loading and preprocessing the data
 
-For this part of the assignment the code below does the following:
+For this part of the assignment the code below does the followings:
 - Load data in R and define the appropriate classes for each field in the data set
 - Obtain  the column names (colNames), number of rows in the data set (numberofRows)
 - Print numberofRows and colNames
@@ -100,9 +100,9 @@ proccessedDataSet <- ddply(originalData,.(interval), summarize, average_steps=me
 
 ```
 This will give us a data frame with all time intervals and the average number of steps taken at each interval. This date will be used to fill missing values. Executing the command:  
-**head**  *(proccessedDataSet,10)*, will show how this dataframe  looks like
+**head**  *(proccessedDataSet,5)*, will show how this dataframe  looks like
 ```{r, echo=FALSE}
-head(proccessedDataSet,10)
+head(proccessedDataSet,5)
 ```
 
 Next step, is to find all missing values in the original dataset and replace them with the average steps taken in the corresponding interval in the *proccessedDataSet* dataset. The follwoing code make use ['DataCombine'](http://cran.r-project.org/web/packages/DataCombine/DataCombine.pdf) package 
