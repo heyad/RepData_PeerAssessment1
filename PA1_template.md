@@ -22,7 +22,7 @@ cat("activity.zip was downloaded on: ", dateaccessed)
 ```
 
 ```
-## activity.zip was downloaded on:  2014-05-17 02:02:19
+## activity.zip was downloaded on:  2014-05-18 16:08:14
 ```
 
 
@@ -104,7 +104,7 @@ dataSubset <- ddply(originalData, .(interval), summarize, average_steps = mean(s
     na.rm = TRUE))
 
 ## plot a time series of average number of taken steps per interval
-plot(dataSubset$interval, dataSubset$average_steps, type = "l", lwd = 2, xlab = "Five minutes intervals", 
+plot(1:288, dataSubset$average_steps, type = "l", lwd = 2, xlab = "Five minutes intervals", 
     ylab = "Average take steps")
 ```
 
